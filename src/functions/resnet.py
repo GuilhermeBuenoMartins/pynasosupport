@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
-"""
+'''
 Functions to implementation of ResNet models
-"""
+'''
+
 from tensorflow.keras.layers import Activation, Add, BatchNormalization, Conv2D, Dense, Flatten
 from tensorflow.keras.layers import GlobalAveragePooling2D, Input, MaxPooling2D, ZeroPadding2D
 from tensorflow.keras.models import Model
 
 
 def identity_block(x, filters_num):
-    """
+    '''
     Identity block without downsample
+
     :param x: input
     :param filters_num: number of filters
     :return: output
-    """
+    '''
+
     x_skip = x
     # Layer 1
     x = Conv2D(filters_num, (3, 3), padding='same')(x)
@@ -29,12 +32,14 @@ def identity_block(x, filters_num):
 
 
 def conv_block(x, filters_num):
-    """
+    '''
     Convolutional block with downsample
+
     :param x: input
     :param filters_num: number of filters
     :return: output
-    """
+    '''
+
     x_skip = x
     # Layer 1
     x = Conv2D(filters_num, (3, 3), strides=(2, 2), padding='same')(x)
@@ -51,7 +56,14 @@ def conv_block(x, filters_num):
     return x
 
 
-def create_resnet34(shape, k=2):
+def get_renet34(shape, k=2):
+    '''
+    The function return model ResNet34.
+
+    :param shape: Input shape
+    :param k: number of classes
+    :return: model ResNet34
+    '''
     # Input block
     input_model = Input(shape)
     x = ZeroPadding2D((3, 3))(input_model)

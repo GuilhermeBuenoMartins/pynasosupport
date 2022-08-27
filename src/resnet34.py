@@ -4,7 +4,7 @@
 Script of ResNet34 execution
 """
 import logging
-import functions
+from src.functions import resnet
 import numpy as np
 import tensorflow as tf
 import src.media.functions as media
@@ -39,7 +39,7 @@ logging.info('Y_test shape: {}'.format(Y_test.shape))
 X = None
 Y = None
 # Train model
-resnet34 = functions.create_resnet34(X_train.shape[1:])
+resnet34 = functions.get_renet34(X_train.shape[1:])
 resnet34.summary()
 resnet34.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(), metrics=['accuracy'])
 # TODO: epochs=100

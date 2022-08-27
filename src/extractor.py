@@ -1,7 +1,7 @@
 """
 Script to extract frames from videos
 """
-import src.media as media
+import src.functions.media
 
 
 for video_name in media.get_inputs():
