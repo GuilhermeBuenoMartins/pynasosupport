@@ -5,16 +5,15 @@ Script of layers comparison between morpholayers and convolution layers
 """
 
 import logging as log
+
 import matplotlib.pyplot as plt
-import tensorflow as tf
+from tensorflow.python.keras.layers import Conv2D
 from tensorflow.python.keras.regularizers import l1_l2
-from tensorflow.keras.layers import Conv2D
-from tensorflow.keras.regularizers import *
+
 from functions.evaluation import get_model, use_model
 from functions.media import read_imgs
 from functions.sampler import build_sets
-from morpholayers.layers import Dilation2D, Erosion2D, Closing2D, Opening2D, Gradient2D, InternalGradient2D, \
-    TopHatOpening2D, TopHatClosing2D
+from morpholayers.layers import *
 from morpholayers.regularizers import L1L2Lattice
 
 # Constants
@@ -47,7 +46,7 @@ input_shape = (x_train.shape[1:])
 
 # Convolution
 layer_0 = Conv2D(
-    NUM_FILTERS,
+    filters=NUM_FILTERS,
     kernel_size=(FILTERS_SIZE, FILTERS_SIZE),
     kernel_regularizer=l1_l2(l1=REGULARIZER_PARAM, l2=REGULARIZER_PARAM),
     activation='relu')
@@ -56,7 +55,7 @@ histConv = use_model(x_train, y_train, x_test, y_test, model_conv, BATCH_SIZE, E
 
 # Dilation
 layer_0 = Dilation2D(
-    NUM_FILTERS,
+    num_filters=NUM_FILTERS,
     kernel_size=(FILTERS_SIZE, FILTERS_SIZE),
     kernel_regularization=L1L2Lattice(l1=REGULARIZER_PARAM, l2=REGULARIZER_PARAM))
 model_dil, _ = get_model(input_shape, NUM_CLASSES, layer_0)
@@ -65,7 +64,7 @@ histDil = use_model(x_train, y_train, x_test, y_test, model_dil, BATCH_SIZE, EPO
 model_dil = None
 # Erosion
 layer_0 = Erosion2D(
-    NUM_FILTERS,
+    num_filters=NUM_FILTERS,
     kernel_size=(FILTERS_SIZE, FILTERS_SIZE),
     kernel_regularization=L1L2Lattice(l1=REGULARIZER_PARAM, l2=REGULARIZER_PARAM))
 model_ero, _ = get_model(input_shape, NUM_CLASSES, layer_0)
@@ -74,7 +73,7 @@ histEro = use_model(x_train, y_train, x_test, y_test, model_ero, BATCH_SIZE, EPO
 model_ero = None
 # Gradient
 layer_0 = Gradient2D(
-    NUM_FILTERS,
+    num_filters=NUM_FILTERS,
     kernel_size=(FILTERS_SIZE, FILTERS_SIZE),
     kernel_regularization=L1L2Lattice(l1=REGULARIZER_PARAM, l2=REGULARIZER_PARAM))
 model_grad, _ = get_model(input_shape, NUM_CLASSES, layer_0)
@@ -83,7 +82,7 @@ model_grad = None
 
 # Internal Gradient
 layer_0 = InternalGradient2D(
-    NUM_FILTERS,
+    num_filters=NUM_FILTERS,
     kernel_size=(FILTERS_SIZE, FILTERS_SIZE),
     kernel_regularization=L1L2Lattice(l1=REGULARIZER_PARAM, l2=REGULARIZER_PARAM))
 model_int_grad, _ = get_model(input_shape, NUM_CLASSES, layer_0)
@@ -92,7 +91,7 @@ model_int_grad = None
 
 # Openning
 layer_0 = Opening2D(
-    NUM_FILTERS,
+    num_filters=NUM_FILTERS,
     kernel_size=(FILTERS_SIZE, FILTERS_SIZE),
     kernel_regularization=L1L2Lattice(l1=REGULARIZER_PARAM, l2=REGULARIZER_PARAM))
 model_open, _ = get_model(input_shape, NUM_CLASSES, layer_0)
@@ -101,7 +100,7 @@ model_open = None
 
 # Closing
 layer_0 = Closing2D(
-    NUM_FILTERS,
+    num_filters=NUM_FILTERS,
     kernel_size=(FILTERS_SIZE, FILTERS_SIZE),
     kernel_regularization=L1L2Lattice(l1=REGULARIZER_PARAM, l2=REGULARIZER_PARAM))
 model_clos, _ = get_model(input_shape, NUM_CLASSES, layer_0)
@@ -110,7 +109,7 @@ model_clos = None
 
 # White top hat
 layer_0 = TopHatOpening2D(
-    NUM_FILTERS,
+    num_filters=NUM_FILTERS,
     kernel_size=(FILTERS_SIZE, FILTERS_SIZE),
     kernel_regularization=L1L2Lattice(l1=REGULARIZER_PARAM, l2=REGULARIZER_PARAM))
 model_w_tophat, _ = get_model(input_shape, NUM_CLASSES, layer_0)
@@ -119,7 +118,7 @@ model_w_tophat = None
 
 # Black top hat
 layer_0 = TopHatClosing2D(
-    NUM_FILTERS,
+    num_filters=NUM_FILTERS,
     kernel_size=(FILTERS_SIZE, FILTERS_SIZE),
     kernel_regularization=L1L2Lattice(l1=REGULARIZER_PARAM, l2=REGULARIZER_PARAM))
 model_b_tophat, _ = get_model(input_shape, NUM_CLASSES, layer_0)

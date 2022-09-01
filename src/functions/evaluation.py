@@ -3,19 +3,21 @@ Functions to evaluation implemented convolutional or morphological layers
 """
 
 import matplotlib.pyplot as plt
+import numpy as np
 import tensorflow as tf
 from sklearn.metrics import confusion_matrix
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Input, Dense, MaxPooling2D, Conv2D, Flatten, Dropout
 
+
 def get_model(input_shape, num_classes, layer_0):
     """
     Function to return a simple model net to be comparing.
 
-    :param input_shape: Image input shape.
+    :param input_shape: image input shape.
     :param num_classes: number of classes.
     :param layer_0: type of first layer of model.
-    :return: Network model and first layer of model.
+    :return: network model and first layer of model.
     """
 
     input_x = Input(input_shape)
@@ -38,8 +40,8 @@ def plot_accuracy(hist):
     """
 
     plt.figure()
-    plt.plot(hist.hist['accuracy'], label='acc')
-    plt.plot(hist.hist['val_accuracy'], label='val_acc')
+    plt.plot(hist.history['accuracy'], label='acc')
+    plt.plot(hist.history['val_accuracy'], label='val_acc')
     plt.grid('on')
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
@@ -56,8 +58,8 @@ def plot_loss(hist):
     """
 
     plt.figure()
-    plt.plot(hist.hist['loss'], label='loss')
-    plt.plot(hist.hist['val_loss'], label='val_loss')
+    plt.plot(hist.history['loss'], label='loss')
+    plt.plot(hist.history['val_loss'], label='val_loss')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.grid('on')
