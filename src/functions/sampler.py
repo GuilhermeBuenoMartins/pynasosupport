@@ -27,18 +27,20 @@ def build_sets(negative_imgs, positive_imgs, train_prcnt, verbose=True):
     x_set, y_set = shuffle(x_set, y_set)
 
     m = m_negative + m_positive
-    m_train = round(m * train_prcnt)
-    m_test = m - m_train
+    threshold = round(m * train_prcnt)
+
+    x_train, y_train = x_set[:threshold], y_set[:threshold]
+    x_test, y_test = x_set[threshold:], y_set[threshold:]
 
     msg = '\nBuild sets\n' \
           '================================\n' \
-          'Training samples:\t {}\n' \
-          'Test samples:\t {} \n' \
+          'Training samples shape:\t {}\n' \
+          'Test samples shape:\t {} \n' \
           '--------------------------\n' \
           'Total of samples:\t {}\n'
 
     if verbose:
-        print(msg.format(m_train, m_test, m))
-    log.info(msg.format(m_train, m_test, m))
+        print(msg.format(x_train.shape, x_test.shape, m))
+    log.info(msg.format(x_train.shape, x_test.shape, m))
 
-    return x_set[:m_train], y_set[:m_train], x_set[:m_test], y_set[:m_test]
+    return x_train, y_train, x_test, y_test
