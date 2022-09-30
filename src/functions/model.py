@@ -4,6 +4,7 @@ Functions of support for known models.
 import logging
 
 from tensorflow.keras import Sequential, Input
+from tensorflow.keras.callbacks import History
 from tensorflow.keras.layers import AveragePooling2D, Conv2D, Dense, Flatten, Layer
 
 from morpholayers.layers import Closing2D, Dilation2D, Erosion2D, Gradient2D, InternalGradient2D, Opening2D, \
@@ -81,3 +82,16 @@ def get_lenet5(input_shape: tuple, num_classes: int, layer_type: str, num_filter
     model.add(Dense(num_classes, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='Adam', metrics=['accuracy'])
     return model
+
+def fit_model(model, data_train:tuple, batch_size:int, epochs:int, verbose, validation_data:tuple) -> History:
+    """
+    The function uses paramter to repass to fit model.
+
+    :param model: The model
+    :param data_train: X and Y training
+    :param batch_size: Number of batch size
+    :param epochs: Number of epochs
+    :param validation_data: The validation data
+    :return: History
+    """
+    return model.fit(data_train[0], data_train[1], batch_size, epochs, verbose, validation_data=validation_data)

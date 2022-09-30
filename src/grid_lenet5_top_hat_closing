@@ -45,7 +45,7 @@ grid_params = dict(num_filters=LIST_NUM_FILTERS, kernel_size=LIST_KERNEL_SIZE)
 lenet5_keras = KerasClassifier(build_fn=get_lenet5,
                                input_shape=input_shape,
                                num_classes=NUM_CLASSES,
-                               layer_type='Dilation2D',
+                               layer_type='TopHatClosing2D',
                                batch_size=BATCH_SIZE,
                                epochs=EPOCHS,
                                verbose=1,
