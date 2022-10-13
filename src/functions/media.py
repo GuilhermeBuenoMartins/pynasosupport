@@ -30,7 +30,7 @@ def read_video(file_name, path='../input'):
     :return: video
     """
 
-    log.info('Reading "{}"...'.format(file_name))
+    log.debug('Reading "{}"...'.format(file_name))
     return cv.VideoCapture(os.path.join(path, file_name))
 
 
@@ -45,7 +45,7 @@ def save_image(image, file_name, path='../output'):
 
     if not os.path.exists(path):
         os.makedirs(path)
-    log.info('Saving the image "{}"...'.format(file_name))
+    log.debug('Saving the image "{}"...'.format(file_name))
     cv.imwrite(os.path.join(path, file_name), image)
 
 
@@ -58,13 +58,13 @@ def extract_frame(video_capture, video_name, fps=30):
     :param fps: frames per seconds
     """
 
-    log.info('Extracting frames...')
+    log.debug('Extracting frames...')
     video_name = video_name.split('.')[0]
     frame_path = '../output/{}'.format(video_name)
     frame_number = 0
     video_fps = video_capture.get(cv.CAP_PROP_FPS)
     fps = video_fps if fps > video_fps else fps
-    log.info('video_fps={}'.format(video_fps))
+    log.debug('video_fps={}'.format(video_fps))
     while video_capture.isOpened():
         exist, frame = video_capture.read()
         if not exist:
@@ -75,7 +75,7 @@ def extract_frame(video_capture, video_name, fps=30):
                 video_name, frame_number, frame_number // video_fps)
             cv.imshow('Frame', frame)
             save_image(frame, frame_name, frame_path)
-    log.info('Extraction done.')
+    log.debug('Extraction done.')
     video_capture.release()
     cv.destroyAllWindows()
 
@@ -90,10 +90,10 @@ def read_imgs(path='input', factor=.0):
     """
 
     if factor > 0:
-        log.info('Reducing images with {} factor...'.format(factor))
+        log.debug('Reducing images with {} factor...'.format(factor))
         img_list = []
         for file_name in get_inputs(path):
-            log.info('Reading image {}...'.format(file_name))
+            log.debug('Reading image {}...'.format(file_name))
             img = cv.cvtColor(cv.imread(os.path.join(path, file_name)), cv.COLOR_BGR2RGB)
             m = round(np.size(img, 0) * (1 - factor))
             n = round(np.size(img, 1) * (1 - factor))
