@@ -4,26 +4,37 @@
 Script executes gridsearch in LeDilationNet-5 model.
 """
 
+import logging
+from datetime import datetime
+
 import tensorflow as tf
 from sklearn.model_selection import GridSearchCV
 from tensorflow.python.keras.wrappers.scikit_learn import KerasClassifier
 
-
+from functions.configlog import set_log
 from functions.media import read_imgs
-from functions.sampler import build_sets
 from functions.model import get_lenet5
+from functions.sampler import build_sets
+
 
 # Constants
-FILE_LOG = '../output/logs/file_log.log'
+
+# FILE_LOG = '../output/logs/grid_lenet5_dilation{}.log'.format(datetime.now().strftime('%Y-%m-%d_%H-%M%S'))
+FILE_NAME = 'grid_lenet5_dilation{}.log'.format(datetime.now().strftime('%Y-%m-%d_%H-%M%S'))
 NEGATIVE_PATH = '/home/gmartins/arquivos/uninove/mestrado/orientacao/projetos/dados/frames/negativos'
 POSITIVE_PATH = '/home/gmartins/arquivos/uninove/mestrado/orientacao/projetos/dados/frames/positivos'
 FACTOR = .9  # Factor of reduction of image
 NUM_CLASSES = 2  # Number of classes
-LIST_NUM_FILTERS = [4, 8, 12, 16]  # List of number of filters
+# LIST_NUM_FILTERS = [4, 8, 12, 16]  # List of number of filters
+# LIST_KERNEL_SIZE = [(3, 3), (5, 5)]  # List of filters size
+LIST_NUM_FILTERS = [4, 8]  # List of number of filters
 LIST_KERNEL_SIZE = [(3, 3), (5, 5)]  # List of filters size
-BATCH_SIZE = 128
-EPOCHS = 100  # List of epochs
+BATCH_SIZE = 256
+EPOCHS = 4  # List of epochs
 TRAIN_PRCNT = 2 / 3  # Percent considered for training data
+
+# Setting logs
+set_log(file_name=FILE_NAME)
 
 # Read images
 negative_imgs = read_imgs(NEGATIVE_PATH, FACTOR)
@@ -51,7 +62,7 @@ lenet5_keras = KerasClassifier(build_fn=get_lenet5,
                                verbose=1,
                                workers=100,
                                use_multiprocessing=True)
-grid = GridSearchCV(estimator=lenet5_keras, param_grid=grid_params, cv=10)
+grid = GridSearchCV(estimator=lenet5_keras, param_grid=grid_params, cv=3)
 grid_result = grid.fit(x_train, y_train)
 
 # Results
