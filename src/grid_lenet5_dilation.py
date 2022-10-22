@@ -17,18 +17,18 @@ from functions.media import read_imgs
 from functions.model import get_lenet5
 from functions.sampler import build_sets
 
-def main(main_path:str, factor=.9, list_num_filter=[4, 8, 12, 16], list_kernel_size=[(3,3), (5,5)], batch_size=None, epochs=100, train_prcnt=2/3, verbose=1):
+def main(main_path:str, factor=.9, list_num_filter=[4, 8, 12, 16], list_kernel_size=[(3,3), (5,5)], batch_size=None, epochs=100, train_prcnt=2/3, cpu_mode=False, verbose=1):
     """
     Main function to execution the script.
 
-    :param main_path:
-    :param factor:
-    :param list_num_filter:
-    :param list_kernel_size:
-    :param batch_size:
-    :param epochs:
-    :param train_prcnt:
-    :return:
+    :param main_path: Images and logs path.
+    :param factor: Factor of images reduction.
+    :param list_num_filter: List of number filters.
+    :param list_kernel_size: List of kernel size.
+    :param batch_size: Batch size value.
+    :param epochs: Epochs value.
+    :param train_prcnt: Training size percent.
+    :return: None
     """
 
     FILE_NAME = 'grid_lenet5_dilation{}.log'.format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
@@ -63,10 +63,12 @@ def main(main_path:str, factor=.9, list_num_filter=[4, 8, 12, 16], list_kernel_s
                                    batch_size=batch_size,
                                    epochs=epochs,
                                    verbose=verbose,
-                                   workers=100,
-                                   use_multiprocessing=True)
+                                  use_multiprocessing=True
+				  )
     grid = GridSearchCV(estimator=lenet5_keras, param_grid=grid_params, cv=3)
-    grid_result = grid.fit(x_train, y_train)
+    if cpu_mode:
+        with tf.device('/cpu:0'):
+            grid_result = grid.fit(x_train, y_train)
 
     # Results
     logging.info('Best {} accuracy using {}'.format(grid_result.best_score_, grid_result.best_params_))
