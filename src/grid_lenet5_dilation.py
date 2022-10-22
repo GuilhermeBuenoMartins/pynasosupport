@@ -17,13 +17,13 @@ from functions.media import read_imgs
 from functions.model import get_lenet5
 from functions.sampler import build_sets
 
-def main(main_path:str, factor=.9, list_num_filter=[4, 8, 12, 16], list_kernel_size=[(3,3), (5,5)], batch_size=None, epochs=100, train_prcnt=2/3, cpu_mode=False, verbose=1):
+def main(main_path:str, factor=.9, list_num_filters=[4, 8, 12, 16], list_kernel_size=[(3, 3), (5, 5)], batch_size=None, epochs=100, train_prcnt=2 / 3, cpu_mode=False, verbose=1):
     """
     Main function to execution the script.
 
     :param main_path: Images and logs path.
     :param factor: Factor of images reduction.
-    :param list_num_filter: List of number filters.
+    :param list_num_filters: List of number filters.
     :param list_kernel_size: List of kernel size.
     :param batch_size: Batch size value.
     :param epochs: Epochs value.
@@ -55,7 +55,7 @@ def main(main_path:str, factor=.9, list_num_filter=[4, 8, 12, 16], list_kernel_s
 
     # Grid search parameters
     input_shape = (x_train.shape[1:])
-    grid_params = dict(num_filters=list_num_filter, kernel_size=list_kernel_size)
+    grid_params = dict(num_filters=list_num_filters, kernel_size=list_kernel_size)
     lenet5_keras = KerasClassifier(build_fn=get_lenet5,
                                    input_shape=input_shape,
                                    num_classes=NUM_CLASSES,
@@ -65,7 +65,7 @@ def main(main_path:str, factor=.9, list_num_filter=[4, 8, 12, 16], list_kernel_s
                                    verbose=verbose,
                                   use_multiprocessing=True
 				  )
-    grid = GridSearchCV(estimator=lenet5_keras, param_grid=grid_params, cv=3)
+    grid = GridSearchCV(estimator=lenet5_keras, param_grid=grid_params, cv=10)
     if cpu_mode:
         with tf.device('/cpu:0'):
             grid_result = grid.fit(x_train, y_train)

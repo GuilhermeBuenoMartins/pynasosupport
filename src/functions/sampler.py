@@ -4,7 +4,7 @@ Functions for easy handling of training and test dataset.
 
 import logging as log
 import numpy as np
-from sklearn.utils import shuffle
+from sklearn.model_selection import train_test_split
 
 
 def build_sets(negative_imgs, positive_imgs, train_prcnt, verbose=True):
@@ -24,13 +24,10 @@ def build_sets(negative_imgs, positive_imgs, train_prcnt, verbose=True):
     x_set = x_set.astype('float32') / 255
     y_set = np.concatenate((np.zeros(m_negative), np.ones(m_positive)))
 
-    x_set, y_set = shuffle(x_set, y_set)
-
     m = m_negative + m_positive
     threshold = round(m * train_prcnt)
 
-    x_train, y_train = x_set[:threshold], y_set[:threshold]
-    x_test, y_test = x_set[threshold:], y_set[threshold:]
+    x_train, x_test, y_train, y_test = train_test_split(x_set, y_set, train_size=threshold, stratify=y_set, random_state=33)
 
     msg = '\nBuild sets\n' \
           '================================\n' \
