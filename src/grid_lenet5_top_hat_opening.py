@@ -61,7 +61,7 @@ def main(main_path: str, factor=.9, list_num_filters=[4, 8, 12, 16], list_kernel
     lenet5_keras = KerasClassifier(build_fn=get_lenet5,
                                    input_shape=input_shape,
                                    num_classes=NUM_CLASSES,
-                                   layer_type='Erosion2D',
+                                   layer_type='TopHatOpening2D',
                                    batch_size=batch_size,
                                    epochs=epochs,
                                    verbose=verbose,
