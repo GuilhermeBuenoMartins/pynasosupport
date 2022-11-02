@@ -33,7 +33,7 @@ def main(main_path: str, factor=.9, list_num_filters=[4, 8, 12, 16], list_kernel
     :return: None
     """
 
-    FILE_NAME = 'grid_lenet5_dilation{}.log'.format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    FILE_NAME = 'grid_lenet5_gradient{}.log'.format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     NUM_CLASSES = 2
     PATH_NEGATIVO = os.path.join(main_path, 'negativos')
     PATH_POSITIVO = os.path.join(main_path, 'positivos')
