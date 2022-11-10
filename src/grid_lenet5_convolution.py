@@ -30,6 +30,8 @@ def main(main_path: str, factor=.9, list_num_filters=[4, 8, 12, 16], list_kernel
     :param batch_size: Batch size value.
     :param epochs: Epochs value.
     :param train_prcnt: Training size percent.
+    :param cpu_mode: When true give preference to CPU use.
+    :param verbose: When equals 1, print trainning on screen.
     :return: None
     """
 
@@ -71,9 +73,31 @@ def main(main_path: str, factor=.9, list_num_filters=[4, 8, 12, 16], list_kernel
     if cpu_mode:
         with tf.device('/cpu:0'):
             grid_result = grid.fit(x_train, y_train)
+    else:
+        grid_result = grid.fit(x_train, y_train)
 
     # Results
     logging.info('Best {} accuracy using {}'.format(grid_result.best_score_, grid_result.best_params_))
     logging.info('All combinations:')
     for acc, params in zip(grid_result.cv_results_['mean_test_score'], grid_result.cv_results_['params']):
         logging.info('Test accuracy {} with {}'.format(acc, params))
+
+
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Create a Grid Lenet-5 Convolution')
+    parser.add_argument('--main_path', type=str, required=True, help='Images and logs path.')
+    parser.add_argument('--factor', type=float, required=False, default=.9, help='Factor of images reduction.')
+    parser.add_argument('--list_num_filters', type=int, nargs='*', required=False, default=[4, 8, 12, 16], help='List of number filters.')
+    parser.add_argument('--list_kernel_size', type=str, nargs='*', required=False, default=["3,3", "5,5"], help='List of kernel size.')
+    parser.add_argument('--batch_size', type=int, required=False, default=None, help='Batch size value.')
+    parser.add_argument('--epochs', type=int, required=False, default=100, help='Epochs value.')
+    parser.add_argument('--train_prcnt', type=float, required=False, default=2/3, help='Training size percent.')
+    parser.add_argument('--cpu_mode', type=bool, required=False, default=False, help='When true give preference to CPU use.')
+    parser.add_argument('--verbose', type=bool, required=False, default=1, help='When equals 1, print trainning on screen.')
+    args = parser.parse_args()
+    args_kernel_size = [eval(kernel_size) for kernel_size in args.list_kernel_size]
+    main(main_path=args.main_path, factor=args.factor, list_num_filters=args.list_num_filters,
+         list_kernel_size=args_kernel_size, batch_size=args.batch_size, epochs=args.epochs,
+         train_prcnt=args.train_prcnt, cpu_mode=args.cpu_mode, verbose=args.verbose)

@@ -9,7 +9,7 @@ import os
 import numpy as np
 
 
-def get_inputs(path='input'):
+def get_inputs(path='../input'):
     """
     Get list of files from path
 
