@@ -71,6 +71,8 @@ def main(main_path: str, factor=.9, list_num_filters=[4, 8, 12, 16], list_kernel
     if cpu_mode:
         with tf.device('/cpu:0'):
             grid_result = grid.fit(x_train, y_train)
+    else:
+        grid_result = grid.fit(x_train, y_train)
 
     # Results
     logging.info('Best {} accuracy using {}'.format(grid_result.best_score_, grid_result.best_params_))
