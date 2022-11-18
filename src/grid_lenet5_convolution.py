@@ -72,11 +72,12 @@ def main(main_path: str, factor=.9, list_num_filters=[4, 8, 12, 16], list_kernel
     grid = GridSearchCV(estimator=lenet5_keras, param_grid=grid_params, cv=10)
     if cpu_mode:
         with tf.device('/cpu:0'):
-            grid_result = grid.fit(x_train, y_train)
+            grid_result = grid.fit(x_train, y_train, validation_data=(x_test, y_test))
     else:
-        grid_result = grid.fit(x_train, y_train)
+        grid_result = grid.fit(x_train, y_train, validation_data=(x_test, y_test))
 
     # Results
+    logging.info("Number of epochs used: {}".format(epochs))
     logging.info('Best {} accuracy using {}'.format(grid_result.best_score_, grid_result.best_params_))
     logging.info('All combinations:')
     for acc, params in zip(grid_result.cv_results_['mean_test_score'], grid_result.cv_results_['params']):
