@@ -178,8 +178,8 @@ def get_func_layer(x, layer_type: str, num_filters: int, kernel_size: tuple, str
     return None
 
 
-def get_renet34(input_shape: tuple, num_classes: int, layer_type: str, num_filters: int, kernel_size: tuple,
-                strides=(1, 1), padding='same', activation=None) -> Model:
+def get_resnet34(input_shape: tuple, num_classes: int, layer_type: str, num_filters: int, kernel_size: tuple,
+                 strides=(1, 1), padding='same', activation=None) -> Model:
     """
     The function return model ResNet34.
 

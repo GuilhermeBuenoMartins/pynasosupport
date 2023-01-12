@@ -9,7 +9,7 @@ import os
 import numpy as np
 
 
-def get_inputs(path='../input'):
+def get_inputs(path='./'):
     """
     Get list of files from path
 
@@ -21,7 +21,7 @@ def get_inputs(path='../input'):
     return os.listdir(path)
 
 
-def read_video(file_name, path='../input'):
+def read_video(file_name, path='./'):
     """
     Read a video in path
 
@@ -34,7 +34,7 @@ def read_video(file_name, path='../input'):
     return cv.VideoCapture(os.path.join(path, file_name))
 
 
-def save_image(image, file_name, path='../output'):
+def save_image(image, file_name, path='./'):
     """
     Save image
 
@@ -49,7 +49,7 @@ def save_image(image, file_name, path='../output'):
     cv.imwrite(os.path.join(path, file_name), image)
 
 
-def extract_frame(video_capture, video_name, fps=30):
+def extract_frame(video_capture, video_name, fps=30, path='./'):
     """
     Extract frame from video
 
@@ -60,7 +60,7 @@ def extract_frame(video_capture, video_name, fps=30):
 
     log.debug('Extracting frames...')
     video_name = video_name.split('.')[0]
-    frame_path = '../output/{}'.format(video_name)
+    frame_path = path + '/{}'.format(video_name)
     frame_number = 0
     video_fps = video_capture.get(cv.CAP_PROP_FPS)
     fps = video_fps if fps > video_fps else fps
@@ -80,7 +80,7 @@ def extract_frame(video_capture, video_name, fps=30):
     cv.destroyAllWindows()
 
 
-def read_imgs(path='input', factor=.0):
+def read_imgs(path='./', factor=.0):
     """
     The function read multiples images from indicated path using a factor of reduction.
 

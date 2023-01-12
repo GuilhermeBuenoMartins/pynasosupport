@@ -3,6 +3,7 @@ The module contains functions to configuration logs
 """
 import logging
 import os.path
+import sys
 
 
 def set_dir(path='../output/logs') -> str:
@@ -27,5 +28,17 @@ def set_log(file_name: str, path='../output/logs', level=logging.INFO, format='%
     :param format: Log format.
     :return: None.
     """
-    file_path = os.path.join(set_dir(path), file_name)
-    logging.basicConfig(filename=file_path, level=level, format=format)
+
+    logPath = os.path.join(set_dir(path), file_name)
+    logFormatter = logging.Formatter(format)
+    rootLogger = logging.getLogger()
+
+    rootLogger.setLevel(level)
+
+    fileHandler = logging.FileHandler(logPath)
+    fileHandler.setFormatter(logFormatter)
+    rootLogger.addHandler(fileHandler)
+
+    consoleHandler = logging.StreamHandler(sys.stdout)
+    consoleHandler.setFormatter(logFormatter)
+    rootLogger.addHandler(consoleHandler)

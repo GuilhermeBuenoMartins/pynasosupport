@@ -7,19 +7,23 @@ Script of layers comparison between morpholayers and convolution layers
 import logging as log
 
 import matplotlib.pyplot as plt
+import tensorflow as tf
 from tensorflow.python.keras.layers import Conv2D
 from tensorflow.python.keras.regularizers import l1_l2
 
-from functions.evaluation import get_model, use_model
-from functions.media import read_imgs
-from functions.sampler import build_sets
-from morpholayers.layers import *
+from handlers.evaluation import get_model, use_model
+from handlers.media import read_imgs
+from handlers.sample import build_sets
+from morpholayers.layers import Dilation2D, Erosion2D, Gradient2D, InternalGradient2D, Opening2D, Closing2D
+from morpholayers.layers import TopHatOpening2D, TopHatClosing2D
 from morpholayers.regularizers import L1L2Lattice
 
+
+path = input('Enter project path: ')
 # Constants
-FILE_LOG = '../output/logs/file_log.log'
-NEGATIVE_PATH = '/home/gmartins/arquivos/uninove/mestrado/orientacao/projetos/dados/frames/negativos'
-POSITIVE_PATH = '/home/gmartins/arquivos/uninove/mestrado/orientacao/projetos/dados/frames/positivos'
+file_log = path + '/output/file_log.log'
+negative_path = '/home/gmartins/arquivos/uninove/mestrado/orientacao/datasets/frames_v1/negativos'
+positive_positive = '/home/gmartins/arquivos/uninove/mestrado/orientacao/datasets/frames_v1/positivos'
 FACTOR = .9  # Factor of reduction of image
 NUM_CLASSES = 2  # Number of classes
 NUM_FILTERS = 8  # Number of filters
@@ -30,10 +34,10 @@ LR = .001  # Learning rate
 REGULARIZER_PARAM = .002
 TRAIN_PRCNT = 2 / 3  # Percent considered for training data
 
-log.basicConfig(filename=FILE_LOG, level=log.INFO)
+log.basicConfig(filename=file_log, level=log.INFO)
 
-negative_imgs = read_imgs(NEGATIVE_PATH, FACTOR)
-positive_imgs = read_imgs(POSITIVE_PATH, FACTOR)
+negative_imgs = read_imgs(negative_path, FACTOR)
+positive_imgs = read_imgs(positive_positive, FACTOR)
 
 x_train, y_train, x_test, y_test = build_sets(negative_imgs, positive_imgs, TRAIN_PRCNT)
 
