@@ -314,3 +314,18 @@ def getVGG16(num_classes: int = 2) -> list:
     ]
     logging.info('VGG-16 layers created.')
     return layers
+
+
+def getLeNet5(num_classes: int = 2) -> list:
+    layers = [
+        Conv2D(filters=6, kernel_size=(5, 5), activation='tanh'),
+        AveragePooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid'),
+        Conv2D(filters=16, kernel_size=(5, 5), activation='tanh', padding='valid'),
+        AveragePooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid'),
+        Flatten(),
+        Dense(units=120, activation='tanh'),
+        Dense(units=84, activation='tanh'),
+        Dense(units=num_classes, activation='softmax')
+    ]
+    logging.info('LeNet-5 layers created.')
+    return layers

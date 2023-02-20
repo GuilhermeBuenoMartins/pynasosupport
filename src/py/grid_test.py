@@ -38,16 +38,16 @@ def main():
     input_shape = (xSet.shape[1:])
 
     # Convolution model
-    layers = model.getVGG16()
+    layers = model.getLeNet5()
     convModel = model.buidlModel(layers, input_shape)
 
     # Gradient model
-    layers = model.getVGG16()
+    layers = model.getLeNet5()
     layers[0] = Gradient2D(4, (3, 3))
     gradModel = model.buidlModel(layers, input_shape)
 
     # Internal gradient model
-    layers = model.getVGG16()
+    layers = model.getLeNet5()
     layers[0] = InternalGradient2D(4, (3, 3))
     intGradModel = model.buidlModel(layers, input_shape)
 
