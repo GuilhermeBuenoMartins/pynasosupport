@@ -1,5 +1,6 @@
 #!/usr/bin/env cola-env
 # -*- coding: utf-8 -*-
+import logging
 import os.path
 from datetime import datetime
 
@@ -18,19 +19,19 @@ def main():
     # Settings
     formatTime = '%Y-%m-%d_%H-%M-%S'
     logFile = 'grid_test_{}.log'.format(datetime.now().strftime(formatTime))
-    log.set_log(logFile, datasetPath)
+    log.set_log(logFile, datasetPath, level=logging.DEBUG)
 
     # Constants
     CV = 2
-    FACTOR = 0.9
+    OUTPUT_SIZE = (108, 72)
     NUM_CLASSES = 2
     LEARNING_RATE = 0.004
 
     # Dataset
     negativePath = os.path.join(datasetPath, 'negativos')
     positivePath = os.path.join(datasetPath, 'positivos')
-    negativeImgs = media.read_imgs(negativePath, FACTOR)
-    positiveImgs = media.read_imgs(positivePath, FACTOR)
+    negativeImgs = media.read_images(negativePath, OUTPUT_SIZE)
+    positiveImgs = media.read_images(positivePath, OUTPUT_SIZE)
     xSet = np.concatenate((np.array(negativeImgs), np.array(positiveImgs)))
     ySet = np.concatenate((np.zeros(len(negativeImgs)), np.ones(len(positiveImgs))))
     negativeImgs = None

@@ -103,3 +103,19 @@ def read_imgs(path='./', factor=.0):
     return None
 
 
+def read_images(path='./', output_size=(108, 72)) -> list:
+    """
+    The function read multiple images from indicated path redimensioning each output images.
+
+    :param path: directory where images are.
+    :param output_size: output size images.
+    :return: list of numpy matrix
+    """
+    log.debug('Images output size = {}'.format(output_size))
+    img_list = []
+    for file_name in get_inputs(path):
+        log.debug('Reading image {}...'.format(file_name))
+        file = os.path.join(path, file_name)
+        img = cv.cvtColor(cv.imread(file), cv.COLOR_BGR2RGB)
+        img_list.append(cv.resize(img, dsize=output_size, interpolation=cv.INTER_CUBIC))
+    return img_list
