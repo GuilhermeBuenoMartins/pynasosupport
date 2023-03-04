@@ -9,8 +9,8 @@ class GridSearch:
     cv = None
     models = None
     num_classes = None
-    trainAccuracies = None
-    testAccuracies = None
+    train = None
+    val = None
 
     def __init__(self, models: list, num_classes: int = 2, cv: int = 2):
         """ This class groups models to apply grid search.
@@ -19,7 +19,7 @@ class GridSearch:
             object: A GridSearch object with some attributes as: models, num_classes, cv,
                 trainAccuracies and testAccuracies. The attribute 'models' is a list of
                 models for application of grid search, the num_classes values is the number
-                of classication classes, 'cv' defines cross validation, 'trainAccuracies'
+                of classication classes, 'cv' defines cross val, 'trainAccuracies'
                 is a matrix with models' training accuracies values while 'testAccuracies',
                 models' test accuracies values.
 
@@ -56,9 +56,9 @@ class GridSearch:
             model.compile(optimizer, loss, metrics)
             logging.info('Model %i compiled', modelId)
 
-    def fitModels(self, x, y, batch_size=None, epochs=1, verbose='auto', callbacks=None, validation_split=0.0,
-                  validation_data=None, workers=1, use_multiprocessing=False):
-        """Applies training using cross validation defined in class instantiation.
+    def fitModels(self, x, y, batch_size=None, epochs=1, verbose='auto', callbacks=None, workers=1,
+                  use_multiprocessing=False):
+        """Applies training using cross val defined in class instantiation.
 
         Args:
             x: Input data. It could be:
@@ -102,26 +102,6 @@ class GridSearch:
             callbacks: List of `keras.callbacks.Callback` instances.
                 List of callbacks to apply during training.
                 See `tf.keras.callbacks`.
-            validation_split: Float between 0 and 1.
-                Fraction of the training data to be used as validation data.
-                The model will set apart this fraction of the training data,
-                will not train on it, and will evaluate
-                the loss and any model metrics
-                on this data at the end of each epoch.
-                The validation data is selected from the last samples
-                in the `x` and `y` data provided, before shuffling. This argument is
-                not supported when `x` is a dataset, generator or
-               `keras.utils.Sequence` instance.
-            validation_data: Data on which to evaluate
-                the loss and any model metrics at the end of each epoch.
-                The model will not be trained on this data.
-                `validation_data` will override `validation_split`.
-                `validation_data` could be:
-                  - tuple `(x_val, y_val)` of Numpy arrays or tensors
-                  - tuple `(x_val, y_val, val_sample_weights)` of Numpy arrays
-                  - dataset
-                For the first two cases, `batch_size` must be provided.
-                For the last case, `validation_steps` could be provided.
             workers: Integer. Used for generator or `keras.utils.Sequence` input
                 only. Maximum number of processes to spin up
                 when using process-based threading. If unspecified, `workers`
@@ -135,74 +115,28 @@ class GridSearch:
                 the generator as they can't be passed easily to children processes.
             """
         modelsQtd = len(self.models)
-        self.trainAccuracies = np.zeros((modelsQtd, self.cv))
-        self.testAccuracies = np.zeros((modelsQtd, self.cv))
         skf = StratifiedKFold(n_splits=self.cv, shuffle=True)
+        self.train = []
+        self.val = []
         for modelId in range(modelsQtd):
             logging.info('Model: %i', modelId)
-            for fold, (trainId, testId) in enumerate(skf.split(x, y)):
-                logging.info('Fold: %i', fold)               
+            trainAccuracies = []
+            trainLosses = []
+            valAccuracies = []
+            valLosses = []
+            for fold, (trainId, valId) in enumerate(skf.split(x, y)):
+                logging.info('Fold: %i', fold)
                 trainX, trainY = x[trainId], to_categorical(y[trainId], self.num_classes)
-                testX, testY = x[testId], to_categorical(y[testId], self.num_classes)
+                valX, valY = x[valId], to_categorical(y[valId], self.num_classes)
                 logging.info('Train sample size: %s', trainY.shape[0])
-                logging.info('Test sample size: %s', testY.shape[0])
-                self.models[modelId].fit(trainX, trainY, batch_size, epochs, verbose, callbacks,
-                                         validation_split, validation_data, workers=workers,
-                                         use_multiprocessing=use_multiprocessing)
-                predictedTrainY = self.models[modelId].predict(trainX)
-                predictedTestY = self.models[modelId].predict(testX)
-                self.trainAccuracies[modelId, fold] = np.mean(np.argmax(predictedTrainY, 1) == np.argmax(trainY, 1))
-                self.testAccuracies[modelId, fold] = np.mean(np.argmax(predictedTestY, 1) == np.argmax(testY, 1))
-                logging.info('Train accuracy: %f', self.trainAccuracies[modelId, fold])
-                logging.info('Test accuracy: %f', self.testAccuracies[modelId, fold])
+                logging.info('Validation sample size: %s', valY.shape[0])
+                hist = self.models[modelId].fit(trainX, trainY, batch_size, epochs, verbose, callbacks,
+                                                validation_data=(valX, valY), workers=workers,
+                                                use_multiprocessing=use_multiprocessing)
+                trainAccuracies.append(hist.history['accuracy'])
+                trainLosses.append(hist.history['loss'])
+                valAccuracies.append(hist.history['val_accuracy'])
+                valLosses.append(hist.history['val_loss'])
+            self.train.append({'accuracy': np.mean(trainAccuracies, 0), 'loss': np.mean(trainLosses, 0)})
+            self.val.append({'accuracy': np.mean(valAccuracies, 0), 'loss': np.mean(valLosses, 0)})
         logging.info('Models fitted.')
-
-    def getAccuracyMean(self, accuracy: str = 'auto'):
-        """Returns test or train accuracy mean.
-
-        Args:
-            accuracy: String parameter accepts one of following values: auto, test or train.
-
-        Returns:
-            For accuracy equals to 'auto', it will be returned two numpy array, training and test accuracy mean
-            respectively. Otherwise, it will be return only test accuracy mean, weather accuracy equals to 'test',
-            or train accuracy mean, when accuracy equals to 'train'.
-        """
-        if self.trainAccuracies is None or self.testAccuracies is None:
-            logging.warnning('Models not fitted. Use GridSearch().fit(x, y) to get using this function.')
-        else:
-            if accuracy is 'auto':
-                return np.mean(self.trainAccuracies, 1), np.mean(self.testAccuracies, 1)
-            if accuracy is 'test':
-                return np.mean(self.testAccuracies, 1)
-            if accuracy is 'train':
-                return np.mean(self.trainAccuracies, 1)
-            else:
-                logging.warnning('Parameter "accuracy" should be auto, test or train.')
-
-    def getBestAccuracy(self, accuracy: str = 'auto'):
-        """Returns the best train or test accuracies for each model.
-
-        Args:
-            accuracy: String parameter accepts one of following values: auto, test or train.
-
-        Returns:
-              For accuracy equals to 'auto', it will be returned two numpy array, best training and test
-              accuracy respectively. Otherwise, it will be return only best test accuracy, weather accuracy
-              equals to 'test', or best train accuracy, when accuracy equals to 'train'.
-        """
-        if self.trainAccuracies is None or self.testAccuracies is None:
-            logging.warnning('Models not fitted. Use GridSearch().fit(x, y) to get using this function.')
-        else:
-            if accuracy is 'auto':
-                bestTrainAccuracy = np.max(self.trainAccuracies, 1)
-                bestTestAccuracy = np.max(self.testAccuracies, 1)
-                return bestTrainAccuracy, bestTestAccuracy
-            if accuracy is 'test':
-                bestAccuracy = np.max(self.testAccuracies, 1)
-            if accuracy is 'train':
-                bestAccuracy = np.max(self.trainAccuracies, 1)
-                return bestAccuracy
-            else:
-                logging.warnning('Parameter "accuracy" should be auto, test or train.')
-            return bestAccuracy
