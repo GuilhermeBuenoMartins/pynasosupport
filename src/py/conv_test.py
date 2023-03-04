@@ -19,7 +19,7 @@ def main():
 
     # Settings
     formatTime = '%Y-%m-%d_%H-%M-%S'
-    logFile = 'grid_test_{}.log'.format(datetime.now().strftime(formatTime))
+    logFile = 'conv_test_{}.log'.format(datetime.now().strftime(formatTime))
     log.set_log(logFile, datasetPath)
 
     # Constants
@@ -39,9 +39,9 @@ def main():
     positiveImgs = None
 
     # Cross validation
-    inputShape = xSet.shape[1:]
+    inputShape = (xSet.shape[1:])
     layers = model.getSimpleModel()
-    layers[0] = Conv2D(12, (3, 3), activation='relu'),
+    layers[0] = Conv2D(12, (3, 3), activation='relu')
     convModel = model.buidlModel(layers, inputShape)
     models = [convModel]
     grid = GridSearch(models, cv=CV)
