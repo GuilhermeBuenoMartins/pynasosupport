@@ -47,10 +47,7 @@ def main():
     grid = GridSearch(models, cv=CV)
     optimizer = tf.keras.optimizers.Adam()
     grid.compileModels(optimizer, 'categorical_crossentropy', ['accuracy'])
-    callbacks = [
-        tf.keras.callbacks.EarlyStopping(monitor='loss', patience=5, restore_best_weights=True),
-        tf.keras.callbacks.ReduceLROnPlateau(patience=2, factor=.5)]
-    grid.fitModels(xSet, ySet, epochs=100, verbose='auto', callbacks=callbacks, workers=4, use_multiprocessing=True)
+    grid.fitModels(xSet, ySet, epochs=100, verbose='auto', workers=4, use_multiprocessing=True)
 
     # Plots
     # Accuracy
