@@ -12,10 +12,10 @@ import tensorflow as tf
 from sklearn.model_selection import GridSearchCV
 from tensorflow.python.keras.wrappers.scikit_learn import KerasClassifier
 
-from functions.configlog import set_log
-from functions.media import read_imgs
-from functions.model import get_lenet5
-from functions.sampler import build_sets
+from handlers.log import set_log
+from handlers.media import read_imgs
+from handlers.model import get_lenet5
+from handlers.sample import build_sets
 
 
 def main(main_path: str, factor=.9, list_num_filters=[4, 8, 12, 16], list_kernel_size=[(3, 3), (5, 5)], batch_size=None,
@@ -33,7 +33,7 @@ def main(main_path: str, factor=.9, list_num_filters=[4, 8, 12, 16], list_kernel
     :return: None
     """
 
-    FILE_NAME = 'grid_lenet5_top_hat_closing{}.log'.format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    FILE_NAME = 'grid_lenet5_gradient{}.log'.format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     NUM_CLASSES = 2
     PATH_NEGATIVO = os.path.join(main_path, 'negativos')
     PATH_POSITIVO = os.path.join(main_path, 'positivos')
@@ -61,7 +61,7 @@ def main(main_path: str, factor=.9, list_num_filters=[4, 8, 12, 16], list_kernel
     lenet5_keras = KerasClassifier(build_fn=get_lenet5,
                                    input_shape=input_shape,
                                    num_classes=NUM_CLASSES,
-                                   layer_type='TopHatClosing2D',
+                                   layer_type='Gradient2D',
                                    batch_size=batch_size,
                                    epochs=epochs,
                                    verbose=verbose,
@@ -85,7 +85,7 @@ def main(main_path: str, factor=.9, list_num_filters=[4, 8, 12, 16], list_kernel
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser(description='Create a Grid Lenet-5 Top Hat Closing')
+    parser = argparse.ArgumentParser(description='Create a Grid Lenet-5 Gradient')
     parser.add_argument('--main_path', type=str, required=True, help='Images and logs path.')
     parser.add_argument('--factor', type=float, required=False, default=.9, help='Factor of images reduction.')
     parser.add_argument('--list_num_filters', type=int, nargs='*', required=False, default=[4, 8, 12, 16], help='List of number filters.')

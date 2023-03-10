@@ -3,10 +3,11 @@ Functions of support for known models.
 """
 import logging
 
+import tensorflow.python.keras
 from tensorflow.keras import Input, Model, Sequential
 from tensorflow.keras.callbacks import History
-from tensorflow.keras.layers import Activation, AveragePooling2D, Add, BatchNormalization, Conv2D, Dense, Flatten, \
-    GlobalAveragePooling2D, Layer, MaxPooling2D, ZeroPadding2D
+from tensorflow.keras.layers import Activation, AveragePooling2D, Add, BatchNormalization, Conv2D, Dense, Dropout, \
+    Flatten, GlobalAveragePooling2D, Layer, MaxPool2D, MaxPooling2D, ZeroPadding2D
 
 from morpholayers.layers import Closing2D, Dilation2D, Erosion2D, Gradient2D, InternalGradient2D, Opening2D, \
     TopHatClosing2D, TopHatOpening2D
@@ -178,8 +179,8 @@ def get_func_layer(x, layer_type: str, num_filters: int, kernel_size: tuple, str
     return None
 
 
-def get_renet34(input_shape: tuple, num_classes: int, layer_type: str, num_filters: int, kernel_size: tuple,
-                strides=(1, 1), padding='same', activation=None) -> Model:
+def get_resnet34(input_shape: tuple, num_classes: int, layer_type: str, num_filters: int, kernel_size: tuple,
+                 strides=(1, 1), padding='same', activation=None) -> Model:
     """
     The function return model ResNet34.
 
@@ -222,3 +223,109 @@ def get_renet34(input_shape: tuple, num_classes: int, layer_type: str, num_filte
     model = Model(input_model, output_model)
     model.compile(loss='categorical_crossentropy', optimizer='Adam', metrics=['accuracy'])
     return model
+
+
+def buidlModel(layers: list = [], input_shape=None) -> Model:
+    numLayers = len(layers)
+    logging.info('Model with {} layer will be built.'.format(numLayers))
+    if numLayers is 0:
+        logging.critical('Parameter can not be "None". Build a model through a layers list.')
+        return None
+    inputLayer = Input(input_shape)
+    x = layers[0](inputLayer)
+    for layerId in range(1, numLayers - 1):
+        x = layers[layerId](x)
+    outputLayer = layers[-1](x)
+    model = Model(inputLayer, outputLayer)
+    logging.info('Model created successfully.')
+    logging.info(model.summary())
+    return model
+
+
+def getSimpleModel(num_classes: int = 2) -> list:
+    layers = [
+        Conv2D(4, (3, 3), activation='relu'),
+        MaxPooling2D(pool_size=(2, 2)),
+        Conv2D(32, kernel_size=(3, 3), activation='relu'),
+        MaxPooling2D(pool_size=(2, 2)),
+        Flatten(),
+        Dropout(0.5),
+        Dense(num_classes, activation='softmax')
+    ]
+    logging.info('Layers created.')
+    return layers
+
+
+def getAlexNet(num_classes: int = 2) -> list:
+    layers = [
+        Conv2D(filters=96, kernel_size=(11, 11), strides=(4, 4), activation='relu'),
+        BatchNormalization(),
+        MaxPool2D(pool_size=(3, 3), strides=(2, 2)),
+        Conv2D(filters=256, kernel_size=(5, 5), strides=(1, 1), activation='relu', padding="same"),
+        BatchNormalization(),
+        MaxPool2D(pool_size=(3, 3), strides=(2, 2)),
+        Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), activation='relu', padding="same"),
+        BatchNormalization(),
+        Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), activation='relu', padding="same"),
+        BatchNormalization(),
+        Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), activation='relu', padding="same"),
+        BatchNormalization(),
+        MaxPool2D(pool_size=(3, 3), strides=(2, 2)),
+        Flatten(),
+        Dense(4096, activation='relu'),
+        Dropout(0.5),
+        Dense(4096, activation='relu'),
+        Dropout(0.5),
+        Dense(num_classes, activation='softmax')
+    ]
+    logging.info('AlexNet layers created.')
+    return layers
+
+
+def getVGG16(num_classes: int = 2) -> list:
+    layers = [
+        # Fist Convolutional Block
+        Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'),
+        Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'),
+        MaxPool2D(pool_size=2, strides=2, padding='same'),
+        # Second Convolutional Block
+        Conv2D(filters=128, kernel_size=3, padding='same', activation='relu'),
+        Conv2D(filters=128, kernel_size=3, padding='same', activation='relu'),
+        MaxPool2D(pool_size=2, strides=2, padding='same'),
+        # Third Convolutional Block
+        Conv2D(filters=256, kernel_size=3, padding='same', activation='relu'),
+        Conv2D(filters=256, kernel_size=3, padding='same', activation='relu'),
+        MaxPool2D(pool_size=2, strides=2, padding='same'),
+        # Fourth Convolutional Block
+        Conv2D(filters=512, kernel_size=3, padding='same', activation='relu'),
+        Conv2D(filters=512, kernel_size=3, padding='same', activation='relu'),
+        MaxPool2D(pool_size=2, strides=2, padding='same'),
+        # Fiveth Convolutional Block
+        Conv2D(filters=512, kernel_size=3, padding='same', activation='relu'),
+        Conv2D(filters=512, kernel_size=3, padding='same', activation='relu'),
+        Conv2D(filters=512, kernel_size=3, padding='same', activation='relu'),
+        MaxPool2D(pool_size=2, strides=2, padding='same'),
+        # Dense layers
+        Flatten(),
+        Dense(units=4096, activation='relu'),
+        Dense(units=4096, activation='relu'),
+        Dense(units=1000, activation='relu'),
+        Dense(num_classes, activation='softmax')
+    ]
+    logging.info('VGG-16 layers created.')
+    return layers
+
+
+def getLeNet5(num_classes: int = 2) -> list:
+    layers = [
+        Conv2D(filters=6, kernel_size=(5, 5), activation='tanh'),
+        AveragePooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid'),
+        Conv2D(filters=16, kernel_size=(5, 5), activation='tanh', padding='valid'),
+        AveragePooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid'),
+        Flatten(),
+        Dense(units=120, activation='tanh'),
+        Dense(units=84, activation='tanh'),
+        Dense(units=num_classes, activation='softmax')
+    ]
+    logging.info('LeNet-5 layers created.')
+    return layers

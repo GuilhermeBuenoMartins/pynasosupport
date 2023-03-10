@@ -1,8 +1,9 @@
 #!/usr/bin/env cola-env
 # -*- coding: utf-8 -*-
 """
-Script of ResNet34 execution
+Script executes gridsearch in LeDilationNet-5 model.
 """
+
 import logging
 import os.path
 from datetime import datetime
@@ -11,13 +12,13 @@ import tensorflow as tf
 from sklearn.model_selection import GridSearchCV
 from tensorflow.python.keras.wrappers.scikit_learn import KerasClassifier
 
-from functions.configlog import set_log
-from functions.media import read_imgs
-from functions.model import get_renet34
-from functions.sampler import build_sets
+from handlers.log import set_log
+from handlers.media import read_imgs
+from handlers.model import get_lenet5
+from handlers.sample import build_sets
 
 
-def main(main_path: str, factor=.9, layer_type='Conv2D', list_num_filters=[4, 8, 12, 16], list_kernel_size=[(3, 3), (5, 5)], batch_size=None,
+def main(main_path: str, factor=.9, list_num_filters=[4, 8, 12, 16], list_kernel_size=[(3, 3), (5, 5)], batch_size=None,
          epochs=100, train_prcnt=2 / 3, cpu_mode=False, verbose=1):
     """
     Main function to execution the script.
@@ -32,7 +33,7 @@ def main(main_path: str, factor=.9, layer_type='Conv2D', list_num_filters=[4, 8,
     :return: None
     """
 
-    FILE_NAME = 'grid_resnet34_{}{}.log'.format(layer_type, datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    FILE_NAME = 'grid_lenet5_dilation{}.log'.format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     NUM_CLASSES = 2
     PATH_NEGATIVO = os.path.join(main_path, 'negativos')
     PATH_POSITIVO = os.path.join(main_path, 'positivos')
@@ -57,10 +58,10 @@ def main(main_path: str, factor=.9, layer_type='Conv2D', list_num_filters=[4, 8,
     # Grid search parameters
     input_shape = (x_train.shape[1:])
     grid_params = dict(num_filters=list_num_filters, kernel_size=list_kernel_size)
-    lenet5_keras = KerasClassifier(build_fn=get_renet34,
+    lenet5_keras = KerasClassifier(build_fn=get_lenet5,
                                    input_shape=input_shape,
                                    num_classes=NUM_CLASSES,
-                                   layer_type=layer_type,
+                                   layer_type='Dilation2D',
                                    batch_size=batch_size,
                                    epochs=epochs,
                                    verbose=verbose,
@@ -74,6 +75,7 @@ def main(main_path: str, factor=.9, layer_type='Conv2D', list_num_filters=[4, 8,
         grid_result = grid.fit(x_train, y_train, validation_data=(x_test, y_test))
 
     # Results
+    logging.info("Number of epochs used: {}".format(epochs))
     logging.info('Best {} accuracy using {}'.format(grid_result.best_score_, grid_result.best_params_))
     logging.info('All combinations:')
     for acc, params in zip(grid_result.cv_results_['mean_test_score'], grid_result.cv_results_['params']):
@@ -83,7 +85,7 @@ def main(main_path: str, factor=.9, layer_type='Conv2D', list_num_filters=[4, 8,
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser(description='Create a Grid Lenet-5 Convolution')
+    parser = argparse.ArgumentParser(description='Create a Grid Lenet-5 Dilation')
     parser.add_argument('--main_path', type=str, required=True, help='Images and logs path.')
     parser.add_argument('--factor', type=float, required=False, default=.9, help='Factor of images reduction.')
     parser.add_argument('--list_num_filters', type=int, nargs='*', required=False, default=[4, 8, 12, 16], help='List of number filters.')
