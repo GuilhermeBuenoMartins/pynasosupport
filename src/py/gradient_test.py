@@ -7,23 +7,25 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.layers import Dense
 
 from handlers import log, media, model, evaluation
 from handlers.gridsearch import GridSearch
 from sklearn import metrics
 
-from tensorflow.keras.layers import Conv2D
+from morpholayers.layers import Gradient2D
+
 
 def main():
     datasetPath = input('Type dataset path: ')
 
     # Settings
     formatTime = '%Y-%m-%d_%H-%M-%S'
-    logFile = 'conv_test_{}.log'.format(datetime.now().strftime(formatTime))
+    logFile = 'gradient_test{}.log'.format(datetime.now().strftime(formatTime))
     log.set_log(logFile, datasetPath)
 
     # Constants
-    CV = 10
+    CV = 5
     TRAIN_VALIDATION_FOLDER = 'treinamento_validacao'
     TEST_FOLDER = 'teste'
     OUTPUT_SIZE = (72, 108)
@@ -40,19 +42,21 @@ def main():
 
     # Cross validation
     inputShape = (xSet.shape[1:])
-    layers = model.getSimpleModel()
-    layers[0] = Conv2D(12, (3, 3), activation='relu')
-    convModel = model.buidlModel(layers, inputShape)
-    models = [convModel]
+    models = []
+    for CVId in range(CV):
+        layers = model.getSimpleModel()
+        layers[0] = Gradient2D(8, (3, 3))
+        gradientModel = model.buidlModel(layers, inputShape)
+        optimizer = tf.keras.optimizers.Adam()
+        gradientModel.compile(optimizer, 'categorical_crossentropy', ['accuracy'])
+        models.append(gradientModel)
     grid = GridSearch(models, cv=CV)
-    optimizer = tf.keras.optimizers.Adam()
-    grid.compileModels(optimizer, 'categorical_crossentropy', ['accuracy'])
-    grid.fitModels(xSet, ySet, epochs=100, verbose='auto', workers=4, use_multiprocessing=True)
+    bestModel = grid.fitModels(xSet, ySet, epochs=20, verbose='auto', use_multiprocessing=True)
 
     # Plots
     # Accuracy
     plt.figure()
-    plt.title('Convolution accuracy using 4 filters 3 X 3')
+    plt.title('Gradient accuracy using 8 filters 3 X 3')
     plt.plot(grid.train[0]['accuracy'], label='Training accuracy')
     plt.plot(grid.val[0]['accuracy'], label='Validation accuracy')
     plt.grid('on')
@@ -64,7 +68,7 @@ def main():
     plt.show()
     #
     plt.figure()
-    plt.title('Convolution loss using 4 filters 3 X 3')
+    plt.title('Gradient loss using 8 filters 3 X 3')
     plt.plot(grid.train[0]['loss'], label='Training loss')
     plt.plot(grid.val[0]['loss'], label='Validation loss')
     plt.grid('on')
@@ -86,10 +90,10 @@ def main():
     positiveImgs = None
 
     # Confusion matrix
-    confusionMatrix = metrics.confusion_matrix(testY, np.argmax(models[0].predict(testX), axis=1))
+    confusionMatrix = metrics.confusion_matrix(testY, np.argmax(bestModel.predict(testX), axis=1))
     confusionMatrixDisplay = metrics.ConfusionMatrixDisplay(confusionMatrix, display_labels=['Negative', 'Positive'])
     confusionMatrixDisplay = confusionMatrixDisplay.plot()
-    confusionMatrixDisplay.ax_.set_title('Confusion matrix of convolution using 4 filters 3 x 3')
+    confusionMatrixDisplay.ax_.set_title('Confusion matrix of gradient using 8 filters 3 x 3')
     plt.show()
     
 

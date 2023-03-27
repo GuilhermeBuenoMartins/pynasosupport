@@ -28,6 +28,7 @@ class GridSearch:
         self.num_classes = num_classes
         self.cv = cv
 
+    @DeprecationWarning
     def compileModels(self, optimizer='rmsprop', loss=None, metrics=None):
         """Configures the models in list for training.
 
@@ -114,29 +115,27 @@ class GridSearch:
                 multiprocessing, you should not pass non-picklable arguments to
                 the generator as they can't be passed easily to children processes.
             """
-        modelsQtd = len(self.models)
         skf = StratifiedKFold(n_splits=self.cv, shuffle=True)
         self.train = []
         self.val = []
-        for modelId in range(modelsQtd):
-            logging.info('Model: %i', modelId)
-            trainAccuracies = []
-            trainLosses = []
-            valAccuracies = []
-            valLosses = []
-            for fold, (trainId, valId) in enumerate(skf.split(x, y)):
-                logging.info('Fold: %i', fold)
-                trainX, trainY = x[trainId], to_categorical(y[trainId], self.num_classes)
-                valX, valY = x[valId], to_categorical(y[valId], self.num_classes)
-                logging.info('Train sample size: %s', trainY.shape[0])
-                logging.info('Validation sample size: %s', valY.shape[0])
-                hist = self.models[modelId].fit(trainX, trainY, batch_size, epochs, verbose, callbacks,
-                                                validation_data=(valX, valY), workers=workers,
-                                                use_multiprocessing=use_multiprocessing)
-                trainAccuracies.append(hist.history['accuracy'])
-                trainLosses.append(hist.history['loss'])
-                valAccuracies.append(hist.history['val_accuracy'])
-                valLosses.append(hist.history['val_loss'])
-            self.train.append({'accuracy': np.mean(trainAccuracies, 0), 'loss': np.mean(trainLosses, 0)})
-            self.val.append({'accuracy': np.mean(valAccuracies, 0), 'loss': np.mean(valLosses, 0)})
+        for foldId, (trainId, valId) in enumerate(skf.split(x, y)):
+            logging.info('Fold id %i', foldId)
+            trainX, trainY = x[trainId], to_categorical(y[trainId], self.num_classes)
+            valX, valY = x[valId], to_categorical(y[valId], self.num_classes)
+            logging.info('Train sample size: %s', trainY.shape[0])
+            logging.info('Validation sample size: %s', valY.shape[0])
+            hist = None
+            if callbacks is None:
+                hist = self.models[foldId].fit(trainX, trainY, batch_size, epochs, verbose, callbacks,
+                                            validation_data=(valX, valY), workers=workers,
+                                            use_multiprocessing=use_multiprocessing)
+            else:
+                hist = self.models[foldId].fit(trainX, trainY, batch_size, epochs, verbose, callbacks,
+                                               validation_data=(valX, valY), workers=workers,
+                                               use_multiprocessing=use_multiprocessing)
+            self.train.append(
+                {'accuracy': np.mean(hist.history['accuracy']), 'loss': np.mean(hist.history['loss'], 0)})
+            self.val.append(
+                {'accuracy': np.mean(hist.history['val_accuracy']), 'loss': np.mean(hist.history['val_loss'], 0)})
         logging.info('Models fitted.')
+        return self.models[np.argmax(np.mean(val['accuracy']) for val in self.val)]
