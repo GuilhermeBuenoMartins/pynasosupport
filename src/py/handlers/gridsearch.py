@@ -120,8 +120,12 @@ class GridSearch:
         self.val = []
         for foldId, (trainId, valId) in enumerate(skf.split(x, y)):
             logging.info('Fold id %i', foldId)
-            trainX, trainY = x[trainId], to_categorical(y[trainId], self.num_classes)
-            valX, valY = x[valId], to_categorical(y[valId], self.num_classes)
+            if (self.num_classes > 1) :
+                trainX, trainY = x[trainId], to_categorical(y[trainId], self.num_classes)
+                valX, valY = x[valId], to_categorical(y[valId], self.num_classes)
+            else:
+                trainX, trainY = x[trainId], y[trainId]
+                valX, valY = x[valId], y[valId]
             logging.info('Train sample size: %s', trainY.shape[0])
             logging.info('Validation sample size: %s', valY.shape[0])
             hist = None
