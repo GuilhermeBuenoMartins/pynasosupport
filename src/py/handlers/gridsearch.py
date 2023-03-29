@@ -138,8 +138,8 @@ class GridSearch:
                                                validation_data=(valX, valY), workers=workers,
                                                use_multiprocessing=use_multiprocessing)
             self.train.append(
-                {'accuracy': np.mean(hist.history['accuracy']), 'loss': np.mean(hist.history['loss'], 0)})
+                {'accuracy': hist.history['accuracy'], 'loss': hist.history['loss']})
             self.val.append(
-                {'accuracy': np.mean(hist.history['val_accuracy']), 'loss': np.mean(hist.history['val_loss'], 0)})
+                {'accuracy': hist.history['val_accuracy'], 'loss': hist.history['val_loss']})
         logging.info('Models fitted.')
-        return self.models[np.argmax(np.mean(val['accuracy']) for val in self.val)]
+        return np.argmax(np.mean(val['accuracy']) for val in self.val)
