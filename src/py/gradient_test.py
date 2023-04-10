@@ -25,7 +25,7 @@ def main():
     log.set_log(logFile, datasetPath)
 
     # Constants
-    CV = 5
+    CV = 3
     TRAIN_VALIDATION_FOLDER = 'treinamento_validacao'
     TEST_FOLDER = 'teste'
     OUTPUT_SIZE = (72, 108)
@@ -46,19 +46,20 @@ def main():
     for CVId in range(CV):
         layers = model.getSimpleModel()
         layers[0] = Gradient2D(8, (3, 3))
+        layers[6] = Dense(1, activation='sigmoid')
         gradientModel = model.buidlModel(layers, inputShape)
         optimizer = tf.keras.optimizers.Adam()
-        gradientModel.compile(optimizer, 'categorical_crossentropy', ['accuracy'])
+        gradientModel.compile(optimizer, 'binary_crossentropy', ['accuracy'])
         models.append(gradientModel)
-    grid = GridSearch(models, cv=CV)
-    bestModel = grid.fitModels(xSet, ySet, epochs=20, verbose='auto', use_multiprocessing=True)
+    grid = GridSearch(models, cv=CV, num_classes=1)
+    best_model_id = grid.fitModels(xSet, ySet, epochs=5, verbose='auto', use_multiprocessing=True)
 
     # Plots
     # Accuracy
     plt.figure()
     plt.title('Gradient accuracy using 8 filters 3 X 3')
-    plt.plot(grid.train[0]['accuracy'], label='Training accuracy')
-    plt.plot(grid.val[0]['accuracy'], label='Validation accuracy')
+    plt.plot(grid.train[best_model_id]['accuracy'], label='Training accuracy')
+    plt.plot(grid.val[best_model_id]['accuracy'], label='Validation accuracy')
     plt.grid('on')
     plt.xlim([0, 100])
     plt.ylim([0.9, 1])
@@ -69,8 +70,8 @@ def main():
     #
     plt.figure()
     plt.title('Gradient loss using 8 filters 3 X 3')
-    plt.plot(grid.train[0]['loss'], label='Training loss')
-    plt.plot(grid.val[0]['loss'], label='Validation loss')
+    plt.plot(grid.train[best_model_id]['loss'], label='Training loss')
+    plt.plot(grid.val[best_model_id]['loss'], label='Validation loss')
     plt.grid('on')
     plt.xlim([0, 100])
     plt.ylim([0, 1])
@@ -90,7 +91,7 @@ def main():
     positiveImgs = None
 
     # Confusion matrix
-    confusionMatrix = metrics.confusion_matrix(testY, np.argmax(bestModel.predict(testX), axis=1))
+    confusionMatrix = metrics.confusion_matrix(testY, np.argmax(models[best_model_id].predict(testX), axis=1))
     confusionMatrixDisplay = metrics.ConfusionMatrixDisplay(confusionMatrix, display_labels=['Negative', 'Positive'])
     confusionMatrixDisplay = confusionMatrixDisplay.plot()
     confusionMatrixDisplay.ax_.set_title('Confusion matrix of gradient using 8 filters 3 x 3')
