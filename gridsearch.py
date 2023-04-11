@@ -41,7 +41,7 @@ class GridSearch:
         last_acc_list = [np.max(acc['val']) for acc in self.acc_list]
         best_model_id = np.argmax(last_acc_list)
         print('The best model index: ', best_model_id)
-        return self.model_list[best_model_id]
+        return self.model_list[best_model_id], best_model_id
 
     def fit_models(self, x, y, batch_size=None, epochs=1, verbose='auto', callbacks_list=None, workers=1,
                    use_multiprocessing=False):
