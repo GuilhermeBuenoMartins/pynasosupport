@@ -2,8 +2,7 @@
 Script to extract frames from videos
 """
 
-from handlers import media
-
+import media
 
 path = input('Enter project path: ')
 input_path = path + '/input/'

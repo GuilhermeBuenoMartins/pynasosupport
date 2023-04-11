@@ -1,9 +1,7 @@
 """
 Functions of support for known models.
 """
-import logging
 
-import tensorflow.python.keras
 from tensorflow.keras import Input, Model, Sequential
 from tensorflow.keras.callbacks import History
 from tensorflow.keras.layers import Activation, AveragePooling2D, Add, BatchNormalization, Conv2D, Dense, Dropout, \
@@ -51,9 +49,16 @@ def get_layer(layer_type: str, num_filters: int, kernel_size: tuple, strides=(1,
     elif layer_type is "TopHatClosing2D":
         return TopHatClosing2D(num_filters, kernel_size, strides, padding)
     else:
-        logging.critical('Layer type {type} not found.'.format(layer_type))
+        print('Layer type {type} not found.'.format(layer_type))
     return None
 
+
+def build_model(input_shape, layers):
+    model = Sequential()
+    model.add(Input(input_shape))
+    for layer in layers:
+        model.add(layer)
+    return model
 
 def get_lenet5(input_shape: tuple, num_classes: int, layer_type: str, num_filters: int, kernel_size: tuple,
                strides=(1, 1), padding='same', activation=None) -> Sequential:
@@ -175,7 +180,7 @@ def get_func_layer(x, layer_type: str, num_filters: int, kernel_size: tuple, str
     elif layer_type is "TopHatClosing2D":
         return TopHatClosing2D(num_filters, kernel_size, strides, padding)(x)
     else:
-        logging.critical('Layer type {type} not found.'.format(layer_type))
+        print('Layer type {type} not found.'.format(layer_type))
     return None
 
 
@@ -225,23 +230,6 @@ def get_resnet34(input_shape: tuple, num_classes: int, layer_type: str, num_filt
     return model
 
 
-def buidlModel(layers: list = [], input_shape=None) -> Model:
-    numLayers = len(layers)
-    logging.info('Model with {} layer will be built.'.format(numLayers))
-    if numLayers is 0:
-        logging.critical('Parameter can not be "None". Build a model through a layers list.')
-        return None
-    inputLayer = Input(input_shape)
-    x = layers[0](inputLayer)
-    for layerId in range(1, numLayers - 1):
-        x = layers[layerId](x)
-    outputLayer = layers[-1](x)
-    model = Model(inputLayer, outputLayer)
-    logging.info('Model created successfully.')
-    logging.info(model.summary())
-    return model
-
-
 def getSimpleModel(num_classes: int = 2) -> list:
     layers = [
         Conv2D(4, (3, 3), activation='relu'),
@@ -252,7 +240,7 @@ def getSimpleModel(num_classes: int = 2) -> list:
         Dropout(0.5),
         Dense(num_classes, activation='softmax')
     ]
-    logging.info('Layers created.')
+    print('Layers created.')
     return layers
 
 
@@ -278,7 +266,7 @@ def getAlexNet(num_classes: int = 2) -> list:
         Dropout(0.5),
         Dense(num_classes, activation='softmax')
     ]
-    logging.info('AlexNet layers created.')
+    print('AlexNet layers created.')
     return layers
 
 
@@ -312,11 +300,11 @@ def getVGG16(num_classes: int = 2) -> list:
         Dense(units=1000, activation='relu'),
         Dense(num_classes, activation='softmax')
     ]
-    logging.info('VGG-16 layers created.')
+    print('VGG-16 layers created.')
     return layers
 
 
-def getLeNet5(num_classes: int = 2) -> list:
+def LeNet5(num_classes: int = 2) -> list:
     layers = [
         Conv2D(filters=6, kernel_size=(5, 5), activation='tanh'),
         AveragePooling2D(pool_size=(2, 2), strides=(2, 2), padding='valid'),
@@ -327,5 +315,5 @@ def getLeNet5(num_classes: int = 2) -> list:
         Dense(units=84, activation='tanh'),
         Dense(units=num_classes, activation='softmax')
     ]
-    logging.info('LeNet-5 layers created.')
+    print('LeNet-5 layers created.')
     return layers
