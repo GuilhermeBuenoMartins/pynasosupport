@@ -37,7 +37,7 @@ class GridSearch:
                                                 validation_data=(val_x, val_y), workers=workers,
                                                 use_multiprocessing=use_multiprocessing)
             pred_val_y = np.argmax(model.predict(val_x))
-            acc_list.append(pred_val_y == val_y)
+            acc_list.append(np.mean(pred_val_y == val_y))
         print("Model fitted.")
         return np.mean(acc_list)
 
