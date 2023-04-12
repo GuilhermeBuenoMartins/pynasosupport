@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn import metrics
 from sklearn.model_selection import StratifiedKFold
 from tensorflow.python.keras.utils.np_utils import to_categorical
 
@@ -37,7 +38,9 @@ class GridSearch:
                                                 validation_data=(val_x, val_y), workers=workers,
                                                 use_multiprocessing=use_multiprocessing)
             pred_val_y = np.argmax(model.predict(val_x))
-            acc_list.append(np.mean(pred_val_y == val_y))
+            acc = metrics.accuracy_score(val_y, pred_val_y)
+            print('\nFold accuracy: ', acc, '\n')
+            acc_list.append(acc)
         print("Model fitted.")
         return np.mean(acc_list)
 
