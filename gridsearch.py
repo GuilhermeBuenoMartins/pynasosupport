@@ -17,7 +17,10 @@ class GridSearch:
 
     def mount_sets(self, x, y, train_id, val_id):
         train_x, val_x = x[train_id], x[val_id]
-        train_y, val_y = to_categorical(y[train_id], self.num_classes), to_categorical(y[val_id], self.num_classes)
+        if (self.num_classes > 1):
+            train_y, val_y = to_categorical(y[train_id], self.num_classes), to_categorical(y[val_id], self.num_classes)
+        else:
+            train_y, val_y = y[train_id], y[val_id]
         print('Training sample size: ', train_y.shape[0])
         print('Validation sample size: ', val_y.shape[0])
         return train_x, train_y, val_x, val_y
