@@ -30,6 +30,15 @@ class GridSearch:
             return [None for i in range(len(self.model_list))]
         return callbacks_list
 
+    def eval_fit(self, model, val_x, val_y):
+        if self.num_classes > 1:
+            pred_val_y = np.argmax(model.predict(val_x))
+        else:
+            pred_val_y = np.where(model.predict(val_x)>=0.5, 1, 0)
+        acc = metrics.accuracy_score(val_y, pred_val_y)
+        print('\nFold accuracy: ', acc, '\n')
+        return acc
+
     def fit_model(self, model, x, y, batch_size=None, epochs=1, verbose='auto', callbacks=None, val_data=None,
                   workers=1, use_multiprocessing=False):
         skf = StratifiedKFold(n_splits=self.cv, shuffle=True)
@@ -40,10 +49,7 @@ class GridSearch:
             model.fit(train_x, train_y, batch_size, epochs, verbose, callbacks=callbacks,
                                                 validation_data=(val_x, val_y), workers=workers,
                                                 use_multiprocessing=use_multiprocessing)
-            pred_val_y = np.argmax(model.predict(val_x))
-            acc = metrics.accuracy_score(val_y, pred_val_y)
-            print('\nFold accuracy: ', acc, '\n')
-            acc_list.append(acc)
+            acc_list.append(self.eval_fit(model, val_x, val_y))
         print("Model fitted.")
         return np.mean(acc_list)
 
