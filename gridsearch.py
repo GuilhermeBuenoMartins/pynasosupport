@@ -21,6 +21,11 @@ class GridSearch:
         print('Validation sample size: ', val_y.shape[0])
         return train_x, train_y, val_x, val_y
 
+    def treat_callbacks(self, callbacks_list):
+        if callbacks_list is None:
+            return [None for i in range(len(self.model_list))]
+        return callbacks_list
+
     def fit_model(self, model, x, y, batch_size=None, epochs=1, verbose='auto', callbacks=None, val_data=None,
                   workers=1, use_multiprocessing=False):
         skf = StratifiedKFold(n_splits=self.cv, shuffle=True)
@@ -36,10 +41,11 @@ class GridSearch:
         print("Model fitted.")
         return np.mean(acc_list)
 
-    def fit_models(self, x, y, batch_size=None, epochs=1, verbose='auto', callbacks=None, workers=1,
+    def fit_models(self, x, y, batch_size=None, epochs=1, verbose='auto', callbacks_list=None, workers=1,
                    use_multiprocessing=False):
         self.acc_mean_list = []
-        for model in self.model_list:
+        callbacks_list = self.treat_callbacks(callbacks_list)
+        for model, callbacks in zip(self.model_list, callbacks_list):
             acc_mean = self.fit_model(model, x, y, batch_size, epochs, verbose, callbacks, workers, use_multiprocessing)
             self.acc_mean_list.append(acc_mean)
             print('Accuracy mean: ', acc_mean)
