@@ -17,12 +17,12 @@ class GridSearch:
 
     def mount_sets(self, x, y, train_id, val_id):
         train_x, val_x = x[train_id], x[val_id]
-        if (self.num_classes > 1):
+        if self.num_classes > 1:
             train_y, val_y = to_categorical(y[train_id], self.num_classes), to_categorical(y[val_id], self.num_classes)
         else:
             train_y, val_y = y[train_id], y[val_id]
-        print('Training sample size: ', train_y.shape[0])
-        print('Validation sample size: ', val_y.shape[0])
+        print('Training output size: ', train_y.shape)
+        print('Validation output size: ', val_y.shape)
         return train_x, train_y, val_x, val_y
 
     def treat_callbacks(self, callbacks_list):
@@ -31,10 +31,7 @@ class GridSearch:
         return callbacks_list
 
     def eval_fit(self, model, val_x, val_y):
-        if self.num_classes > 1:
-            pred_val_y = np.argmax(model.predict(val_x))
-        else:
-            pred_val_y = np.where(model.predict(val_x)>=0.5, 1, 0)
+        pred_val_y = np.where(model.predict(val_x) >= 0.5, 1, 0)
         acc = metrics.accuracy_score(val_y, pred_val_y)
         print('\nFold accuracy: ', acc, '\n')
         return acc
@@ -57,11 +54,12 @@ class GridSearch:
                    use_multiprocessing=False):
         self.acc_mean_list = []
         callbacks_list = self.treat_callbacks(callbacks_list)
-        for model, callbacks in zip(self.model_list, callbacks_list):
+        for model_id, model, callbacks in zip(range(len(self.model_list)), self.model_list, callbacks_list):
+            print('Fitting model: ', model_id)
             acc_mean = self.fit_model(model, x, y, batch_size, epochs, verbose, callbacks, workers, use_multiprocessing)
             self.acc_mean_list.append(acc_mean)
-            print('Accuracy mean: ', acc_mean)
-        print('Models fitted!')
+            print('\nAccuracy mean: ', acc_mean, '\n\n')
+        print('All models was fitted!')
 
     def get_best_model(self):
         best_model_id = np.argmax(self.acc_mean_list)
