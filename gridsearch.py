@@ -61,7 +61,7 @@ class GridSearch:
         return np.mean(acc_list)
 
     def fit_models(self, x, y, batch_size=None, epochs=1, verbose='auto', callbacks_list=None, workers=1,
-                   use_multiprocessing=False, eva_criteria='accuracy'):
+                   use_multiprocessing=False, eval_criteria='accuracy'):
         self.eval_mean_list = []
         callbacks_list = self.treat_callbacks(callbacks_list)
         for model_id, model, callbacks in zip(range(len(self.model_list)), self.model_list, callbacks_list):
