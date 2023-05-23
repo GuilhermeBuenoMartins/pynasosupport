@@ -41,6 +41,9 @@ class GridSearch:
         elif eval_criteria == 'recall':
             eval_value = metrics.recall_score(val_y, pred_val_y)
             print('\nFold recall: ', eval_value, '\n')
+        elif eval_criteria == 'fbeta':
+            eval_value = metrics.fbeta_score(val_y, pred_val_y, beta=.2)
+            print('\nFold F\u03B2-score: ', eval_value, '\n')
         else:
             eval_value = metrics.f1_score(val_y, val_y)
             print('\nFold F1-score: ', eval_value, '\n')
