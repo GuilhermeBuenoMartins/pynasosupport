@@ -66,16 +66,25 @@ class GridSearch:
     def fit_models(self, x, y, batch_size=None, epochs=1, verbose='auto', callbacks_list=None, workers=1,
                    use_multiprocessing=False, eval_criteria='accuracy'):
         self.eval_mean_list = []
+        best_eval_mean = 0.0
+        next_model = self.model_list[0]
         callbacks_list = self.treat_callbacks(callbacks_list)
-        for model_id, model, callbacks in zip(range(len(self.model_list)), self.model_list, callbacks_list):
+        for model_id, callbacks in zip(range(len(self.model_list)), callbacks):
             print('Fitting model: ', model_id)
-            eval_mean = self.fit_model(model, x, y, batch_size, epochs, verbose, callbacks, workers,
+            eval_mean = self.fit_model(next_model, x, y, batch_size, epochs, verbose, callbacks, workers,
                                        use_multiprocessing, eval_criteria)
             self.eval_mean_list.append(eval_mean)
             print('\nEvaluation mean: ', eval_mean, '\n\n')
-        print('All models was fitted!')
-
-    def get_best_model(self):
-        best_model_id = np.argmax(self.eval_mean_list)
-        print('Best model index: ', best_model_id)
-        return self.model_list[best_model_id], best_model_id
+            if model_id == 0:
+                next_model = self.model_list[1]
+                best_eval_mean = eval_mean
+            else:
+                remotion_id = 1
+                print('Removing worst model...')
+                if best_eval_mean < eval_mean:
+                    remotion_id = 0
+                    best_eval_mean = eval_mean
+                print('Remotion id: ', remotion_id)
+                self.model_list.pop(remotion_id)
+                print('Wort model removed.\n\n')
+        print('All models was fitted!')   
