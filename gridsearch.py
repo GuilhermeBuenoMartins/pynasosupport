@@ -69,7 +69,7 @@ class GridSearch:
         best_eval_mean = 0.0
         next_model = self.model_list[0]
         callbacks_list = self.treat_callbacks(callbacks_list)
-        for model_id, callbacks in zip(range(len(self.model_list)), callbacks):
+        for model_id, callbacks in zip(range(len(self.model_list)), callbacks_list):
             print('Fitting model: ', model_id)
             eval_mean = self.fit_model(next_model, x, y, batch_size, epochs, verbose, callbacks, workers,
                                        use_multiprocessing, eval_criteria)
@@ -87,4 +87,5 @@ class GridSearch:
                 print('Remotion id: ', remotion_id)
                 self.model_list.pop(remotion_id)
                 print('Wort model removed.\n\n')
-        print('All models was fitted!')   
+        print('All models was fitted!')
+        return self.model_list[0]   
